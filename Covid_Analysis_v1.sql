@@ -50,7 +50,7 @@ CREATE TABLE covid_vaccination
     excess_mortality FLOAT
     );
     
-LOAD DATA INFILE 'D:/My Work/All about DS/Project/CovidVaccination.csv'
+LOAD DATA INFILE 'D:/Project/CovidVaccination.csv'
 INTO TABLE covid_vaccination
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
@@ -87,7 +87,7 @@ CREATE TABLE covid_deaths
     weekly_hosp_admissions_per_million FLOAT
 );
     
-LOAD DATA INFILE 'D:/My Work/All about DS/Project/CovidDeaths.csv'
+LOAD DATA INFILE 'D:/Project/CovidDeaths.csv'
 INTO TABLE covid_deaths
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
