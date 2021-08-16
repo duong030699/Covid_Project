@@ -1,13 +1,12 @@
--- Create Database
+-- 1. Create Database
 DROP DATABASE IF EXISTS covid_project;
 
 CREATE DATABASE covid_project;
 
 USE covid_project;
 
--- Create tables and insert data into table
-DROP TABLE IF EXISTS covid_deaths;
-
+-- 2. Create tables and insert data into table
+-- 2.1 Table: covid_vaccination
 DROP TABLE IF EXISTS covid_vaccination;
 
 CREATE TABLE covid_vaccination
@@ -57,11 +56,8 @@ FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS;
 
-SELECT * FROM covid_vaccination
-WHERE continent NOT LIKE "";
-
+-- 2.2 Table: covid_deaths
 DROP TABLE IF EXISTS covid_deaths;
-
 CREATE TABLE covid_deaths
 	(iso_code VARCHAR(255) NOT NULL,
     continent VARCHAR(255) NOT NULL,
@@ -97,49 +93,48 @@ FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS;
 
+-- 2.3 Double-check 2 tables
 SELECT * FROM covid_deaths;
-
--- Looking at Total Cases vs Total Deaths 
+-- 3. Query to find the insights
+-- 3.1 Looking at Total Cases vs Total Deaths 
 SELECT location, date, total_cases, total_deaths, (total_deaths / total_cases)*100 AS DeathPercentage
 FROM covid_deaths
 WHERE continent NOT LIKE "" 
--- WHERE LOCATION LIKE 'United States'
 ORDER BY 1,2;
 
--- Looking at Total Cases vs Population
+-- 3.2 Looking at Total Cases vs Population
 SELECT location, date, total_cases, population, (total_cases / population )*100 AS InfectionPercentage
 FROM covid_deaths
 WHERE continent NOT LIKE "" 
--- WHERE LOCATION LIKE 'United States'
 ORDER BY 1,3;
   
--- Looking at Countries with Highest Infection Rate compared to Population  
+-- 3.3 Looking at Countries with Highest Infection Rate compared to Population  
 SELECT location, population, MAX(total_cases) AS HighestInfectionCount, MAX(total_cases / population )*100 AS PercentPopulationInfected
 FROM covid_deaths
 WHERE continent NOT LIKE ""
 GROUP BY location, population
 ORDER BY HighestInfectionCount DESC;
 
--- Looking at countries with Highest Death Count per Population
+-- 3.4 Looking at countries with Highest Death Count per Population
 SELECT location, population,  MAX(CAST(total_deaths AS UNSIGNED)) AS HighestDeathCount, MAX(total_cases) AS total_cases, (MAX(total_deaths) / MAX(total_cases))*100 AS PercentPopulationDeath
 FROM covid_deaths
 WHERE continent NOT LIKE ""
 GROUP BY location, population
 ORDER BY HighestDeathCount DESC;
 
--- Looking at continents with the highest death count per population
+-- 3.5 Looking at continents with the highest death count per population
 SELECT continent, MAX(CAST(total_deaths AS UNSIGNED)) AS HighestDeathCount, MAX(total_cases) AS total_cases, (MAX(total_deaths) / MAX(total_cases))*100 AS PercentPopulationDeath
 FROM covid_deaths
 WHERE continent NOT LIKE ""
 GROUP BY continent
 ORDER BY HighestDeathCount DESC;
 
--- Global numbers 
+-- 3.6 Global numbers 
 SELECT date, SUM(new_cases) AS DailyNewCase, SUM(new_deaths) AS DailyNewDeath FROM covid_deaths
 WHERE continent NOT LIKE ""
 GROUP BY date;
 
--- Looking at Population and Vaccination Information
+-- 3.7 Looking at Population and Vaccination Information
 SELECT cd.continent, cd.location, cd.date, cd.population, cv.new_vaccinations AS DailyNewVaccine,
 SUM(cv.new_vaccinations) OVER (partition by location ORDER BY cd.location, cd.date) AS TotalVaccineProvided
 FROM covid_deaths AS cd
@@ -149,7 +144,7 @@ JOIN covid_vaccination AS cv
 WHERE cd.continent NOT LIKE ""
 GROUP BY cd.continent, cd.location, cd.population, cd.date;
 
--- USE CTE
+-- 3.8 USE CTE to find Percentage of vaccinated people
 
 With PopVsVac 
 AS 
@@ -167,12 +162,12 @@ ORDER by cd.Location, cd.date
 SELECT *, (TotalVaccineProvided/Population)*100 AS PercentVaccineProvided
 FROM PopVsVac AS PV;
 
--- Looking at number of vaccinated people vs number of provided vaccines 
+-- 3.9 Looking at number of vaccinated people vs number of provided vaccines 
 Select date,location, cv.people_vaccinated, cv.people_fully_vaccinated, total_vaccinations 
 FROM covid_vaccination AS cv
 ORDER BY location,date;
 
--- Creating view
+-- 4. Creating view
 CREATE VIEW PercentPopVaccinated AS
 SELECT cd.continent, cd.location, cd.date, cd.population, cv.new_vaccinations AS DailyNewVaccine,
 SUM(cv.new_vaccinations) OVER (partition by location ORDER BY cd.location, cd.date) AS TotalVaccineProvided
