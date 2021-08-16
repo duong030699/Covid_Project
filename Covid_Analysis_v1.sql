@@ -95,6 +95,7 @@ IGNORE 1 ROWS;
 
 -- 2.3 Double-check 2 tables
 SELECT * FROM covid_deaths;
+SELECT * FROM covid_vaccination;
 -- 3. Query to find the insights
 -- 3.1 Looking at Total Cases vs Total Deaths 
 SELECT location, date, total_cases, total_deaths, (total_deaths / total_cases)*100 AS DeathPercentage
